@@ -25,10 +25,10 @@ interface BoardHealth {
   pendingDeployment: number; // PD
   productionLive: number; // PL
   // Weekly metrics (W1, W2, W3, W4)
-  w1: number;
-  w2: number;
-  w3: number;
-  w4: number;
+  w1: { bl: number; dr: number; dg: number; pd: number; pl: number; devCount: number };
+  w2: { bl: number; dr: number; dg: number; pd: number; pl: number; devCount: number };
+  w3: { bl: number; dr: number; dg: number; pd: number; pl: number; devCount: number };
+  w4: { bl: number; dr: number; dg: number; pd: number; pl: number; devCount: number };
 }
 
 interface Board {
@@ -38,7 +38,7 @@ interface Board {
   sprint: string;
   projectManager: string;
   totalIssues: number;
-  inProgress: number;
+  remainingIssues: number;
   health: BoardHealth;
 }
 
@@ -74,7 +74,7 @@ const mockData: EngineeringManager[] = [
         sprint: 'Sprint 23',
         projectManager: 'John Smith',
         totalIssues: 45,
-        inProgress: 12,
+        remainingIssues: 13,
         health: {
           velocity: 85,
           blockers: 2,
@@ -96,10 +96,10 @@ const mockData: EngineeringManager[] = [
           doneGoals: 12,
           pendingDeployment: 3,
           productionLive: 9,
-          w1: 12,
-          w2: 18,
-          w3: 15,
-          w4: 22
+          w1: { bl: 1, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w2: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w3: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w4: { bl: 2, dr: 3, dg: 0, pd: 0, pl: 0, devCount: 1 }
         }
       },
       {
@@ -109,7 +109,7 @@ const mockData: EngineeringManager[] = [
         sprint: 'Sprint 15',
         projectManager: 'Lisa Chen',
         totalIssues: 28,
-        inProgress: 8,
+        remainingIssues: 11,
         health: {
           velocity: 72,
           blockers: 4,
@@ -131,10 +131,10 @@ const mockData: EngineeringManager[] = [
           doneGoals: 8,
           pendingDeployment: 2,
           productionLive: 6,
-          w1: 8,
-          w2: 14,
-          w3: 11,
-          w4: 16
+          w1: { bl: 1, dr: 1, dg: 0, pd: 0, pl: 0, devCount: 2 },
+          w2: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w3: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w4: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 0 }
         }
       }
     ]
@@ -157,7 +157,7 @@ const mockData: EngineeringManager[] = [
         sprint: 'Sprint 31',
         projectManager: 'David Kim',
         totalIssues: 62,
-        inProgress: 18,
+        remainingIssues: 19,
         health: {
           velocity: 90,
           blockers: 1,
@@ -179,10 +179,10 @@ const mockData: EngineeringManager[] = [
           doneGoals: 18,
           pendingDeployment: 2,
           productionLive: 16,
-          w1: 20,
-          w2: 25,
-          w3: 28,
-          w4: 32
+          w1: { bl: 5, dr: 18, dg: 0, pd: 0, pl: 1, devCount: 4 },
+          w2: { bl: 42, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 12 },
+          w3: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 1, devCount: 2 },
+          w4: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 0 }
         }
       },
       {
@@ -192,7 +192,7 @@ const mockData: EngineeringManager[] = [
         sprint: 'Sprint 12',
         projectManager: 'Emma Wilson',
         totalIssues: 35,
-        inProgress: 15,
+        remainingIssues: 22,
         health: {
           velocity: 45,
           blockers: 8,
@@ -214,10 +214,10 @@ const mockData: EngineeringManager[] = [
           doneGoals: 5,
           pendingDeployment: 7,
           productionLive: 3,
-          w1: 5,
-          w2: 8,
-          w3: 6,
-          w4: 9
+          w1: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 4 },
+          w2: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 2 },
+          w3: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w4: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 0 }
         }
       }
     ]
@@ -240,7 +240,7 @@ const mockData: EngineeringManager[] = [
         sprint: 'Sprint 8',
         projectManager: 'Michael Brown',
         totalIssues: 52,
-        inProgress: 11,
+        remainingIssues: 16,
         health: {
           velocity: 78,
           blockers: 3,
@@ -262,10 +262,10 @@ const mockData: EngineeringManager[] = [
           doneGoals: 15,
           pendingDeployment: 3,
           productionLive: 12,
-          w1: 15,
-          w2: 19,
-          w3: 17,
-          w4: 24
+          w1: { bl: 1, dr: 3, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w2: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w3: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 1 },
+          w4: { bl: 0, dr: 0, dg: 0, pd: 0, pl: 0, devCount: 3 }
         }
       }
     ]
@@ -300,22 +300,20 @@ const HealthTile: React.FC<{ label: string; value: number | string; icon: React.
   );
 };
 
-const BoardCard: React.FC<{ board: Board }> = ({ board }) => {
+const WeeklyMetricCell: React.FC<{ value: number; label: string }> = ({ value, label }) => (
+  <div className="text-center">
+    <div className="text-sm font-bold text-slate-800">{value}</div>
+    <div className="text-xs text-slate-500 uppercase tracking-wide">{label}</div>
+  </div>
+);
+
+const BoardRow: React.FC<{ board: Board }> = ({ board }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return 'bg-emerald-500';
       case 'warning': return 'bg-amber-500';
       case 'critical': return 'bg-red-500';
       default: return 'bg-slate-500';
-    }
-  };
-
-  const getStatusBorder = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'border-emerald-200 hover:border-emerald-300 shadow-emerald-100';
-      case 'warning': return 'border-amber-200 hover:border-amber-300 shadow-amber-100';
-      case 'critical': return 'border-red-200 hover:border-red-300 shadow-red-100';
-      default: return 'border-slate-200 hover:border-slate-300 shadow-slate-100';
     }
   };
 
@@ -329,196 +327,160 @@ const BoardCard: React.FC<{ board: Board }> = ({ board }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-slate-100 hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* Header Section */}
-      <div className={`p-6 border-b border-slate-100 ${getStatusBorder(board.health.status)}`}>
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{board.name}</h3>
-              <div className={`w-4 h-4 rounded-full ${getStatusColor(board.health.status)} shadow-sm`}></div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">{board.project}</span>
-              <span className="text-sm text-slate-500">•</span>
-              <span className="text-sm text-slate-600">{board.projectManager}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Sprint Information */}
-        <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-slate-700">{board.sprint}</span>
-            <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getUnderstandingColor(board.health.sprintUnderstanding)}`}>
-              Level {board.health.sprintUnderstanding}
-            </span>
-          </div>
-          <div className="text-sm text-slate-800 font-medium mb-2">{board.health.sprintGoal}</div>
-          <div className="text-sm text-slate-600 flex items-center">
-            <Calendar className="w-4 h-4 mr-2" />
-            {board.health.sprintDates}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="p-6">
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Side - Sprint Metrics */}
-          <div>
-            <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">Sprint Metrics</h4>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-blue-700">{board.health.backlogItems}</div>
-                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-wide">BL</div>
-                </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-green-700">{board.health.doneRatio}</div>
-                  <div className="text-xs font-semibold text-green-600 uppercase tracking-wide">DR</div>
-                </div>
+    <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-300 group mb-6">
+      <div className="grid grid-cols-12 min-h-[120px]">
+        {/* Board Info Section */}
+        <div className="col-span-3 p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-r border-slate-200">
+          <div className="flex items-start space-x-3">
+            <div className={`w-4 h-4 rounded-full ${getStatusColor(board.health.status)} shadow-sm mt-1 flex-shrink-0`}></div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                {board.name}
+              </h3>
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-1 rounded-full">
+                  {board.project}
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-purple-700">{board.health.doneGoals}</div>
-                  <div className="text-xs font-semibold text-purple-600 uppercase tracking-wide">DG</div>
-                </div>
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-orange-700">{board.health.pendingDeployment}</div>
-                  <div className="text-xs font-semibold text-orange-600 uppercase tracking-wide">PD</div>
-                </div>
-              </div>
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-emerald-700">{board.health.productionLive}</div>
-                <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">PL</div>
+              <div className="text-sm text-slate-600 mt-2">{board.projectManager}</div>
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold border mt-2 ${getUnderstandingColor(board.health.sprintUnderstanding)}`}>
+                Level {board.health.sprintUnderstanding}
               </div>
             </div>
           </div>
-
-          {/* Right Side - Weekly Metrics */}
-          <div>
-            <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">Weekly Progress</h4>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-indigo-700">{board.health.w1}</div>
-                  <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">W1</div>
-                </div>
-                <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-cyan-700">{board.health.w2}</div>
-                  <div className="text-xs font-semibold text-cyan-600 uppercase tracking-wide">W2</div>
-                </div>
+          
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{board.totalIssues}</div>
+                <div className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Total Issues</div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-teal-700">{board.health.w3}</div>
-                  <div className="text-xs font-semibold text-teal-600 uppercase tracking-wide">W3</div>
-                </div>
-                <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-rose-700">{board.health.w4}</div>
-                  <div className="text-xs font-semibold text-rose-600 uppercase tracking-wide">W4</div>
-                </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-amber-600">{board.remainingIssues}</div>
+                <div className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Remaining</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quality Metrics */}
-        <div className="mt-6 pt-6 border-t border-slate-100">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-emerald-200">
-              <div className="text-2xl font-bold text-emerald-700">{board.health.estimationAccuracy}%</div>
-              <div className="text-sm font-semibold text-emerald-600">E/S Accuracy</div>
+        {/* Weekly Metrics W1-W4 */}
+        <div className="col-span-6 p-4">
+          <div className="grid grid-cols-4 gap-4 h-full">
+            {/* W1 */}
+            <div className="bg-gradient-to-b from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200">
+              <div className="text-center mb-3">
+                <div className="text-sm font-bold text-indigo-800 uppercase tracking-wide">W1</div>
+                <div className="text-xs text-indigo-600">(Jul 14th - Jul 18th)</div>
+                <div className="text-lg font-bold text-indigo-700 mt-1">Dev: {board.health.w1.devCount}</div>
+              </div>
+              <div className="space-y-2">
+                <WeeklyMetricCell value={board.health.w1.bl} label="BL" />
+                <WeeklyMetricCell value={board.health.w1.dr} label="DR" />
+                <WeeklyMetricCell value={board.health.w1.dg} label="DG" />
+                <WeeklyMetricCell value={board.health.w1.pd} label="PD" />
+                <WeeklyMetricCell value={board.health.w1.pl} label="PL" />
+              </div>
             </div>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-indigo-200">
-              <div className="text-2xl font-bold text-indigo-700">{board.health.devCount}</div>
-              <div className="text-sm font-semibold text-indigo-600">Dev Count</div>
+
+            {/* W2 */}
+            <div className="bg-gradient-to-b from-cyan-50 to-cyan-100 rounded-xl p-4 border border-cyan-200">
+              <div className="text-center mb-3">
+                <div className="text-sm font-bold text-cyan-800 uppercase tracking-wide">W2</div>
+                <div className="text-xs text-cyan-600">(Jul 21st - Jul 25th)</div>
+                <div className="text-lg font-bold text-cyan-700 mt-1">Dev: {board.health.w2.devCount}</div>
+              </div>
+              <div className="space-y-2">
+                <WeeklyMetricCell value={board.health.w2.bl} label="BL" />
+                <WeeklyMetricCell value={board.health.w2.dr} label="DR" />
+                <WeeklyMetricCell value={board.health.w2.dg} label="DG" />
+                <WeeklyMetricCell value={board.health.w2.pd} label="PD" />
+                <WeeklyMetricCell value={board.health.w2.pl} label="PL" />
+              </div>
+            </div>
+
+            {/* W3 */}
+            <div className="bg-gradient-to-b from-teal-50 to-teal-100 rounded-xl p-4 border border-teal-200">
+              <div className="text-center mb-3">
+                <div className="text-sm font-bold text-teal-800 uppercase tracking-wide">W3</div>
+                <div className="text-xs text-teal-600">(Jul 28th - Aug 1st)</div>
+                <div className="text-lg font-bold text-teal-700 mt-1">Dev: {board.health.w3.devCount}</div>
+              </div>
+              <div className="space-y-2">
+                <WeeklyMetricCell value={board.health.w3.bl} label="BL" />
+                <WeeklyMetricCell value={board.health.w3.dr} label="DR" />
+                <WeeklyMetricCell value={board.health.w3.dg} label="DG" />
+                <WeeklyMetricCell value={board.health.w3.pd} label="PD" />
+                <WeeklyMetricCell value={board.health.w3.pl} label="PL" />
+              </div>
+            </div>
+
+            {/* W4 */}
+            <div className="bg-gradient-to-b from-rose-50 to-rose-100 rounded-xl p-4 border border-rose-200">
+              <div className="text-center mb-3">
+                <div className="text-sm font-bold text-rose-800 uppercase tracking-wide">W4</div>
+                <div className="text-xs text-rose-600">(Aug 4th - Aug 8th)</div>
+                <div className="text-lg font-bold text-rose-700 mt-1">Dev: {board.health.w4.devCount}</div>
+              </div>
+              <div className="space-y-2">
+                <WeeklyMetricCell value={board.health.w4.bl} label="BL" />
+                <WeeklyMetricCell value={board.health.w4.dr} label="DR" />
+                <WeeklyMetricCell value={board.health.w4.dg} label="DG" />
+                <WeeklyMetricCell value={board.health.w4.pd} label="PD" />
+                <WeeklyMetricCell value={board.health.w4.pl} label="PL" />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-          <div className="flex items-center space-x-2">
-            <Gauge className="w-4 h-4 text-slate-500" />
-            <span className="text-sm font-semibold text-slate-700">Velocity: {board.health.velocity}%</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Activity className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-semibold text-emerald-600">Active Sprint</span>
+        {/* Health Metrics */}
+        <div className="col-span-3 p-4 bg-gradient-to-r from-slate-50 to-purple-50 border-l border-slate-200">
+          <div className="h-full">
+            <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide text-center">Health Metrics</h4>
+            <div className="grid grid-cols-2 gap-2 h-full">
+              <HealthTile
+                label="Velocity"
+                value={`${board.health.velocity}%`}
+                icon={<TrendingUp className="w-3 h-3" />}
+                variant={board.health.velocity >= 80 ? 'success' : board.health.velocity >= 60 ? 'warning' : 'error'}
+              />
+              
+              <HealthTile
+                label="Blockers"
+                value={board.health.blockers}
+                icon={<AlertTriangle className="w-3 h-3" />}
+                variant={board.health.blockers === 0 ? 'success' : board.health.blockers <= 3 ? 'warning' : 'error'}
+              />
+              
+              <HealthTile
+                label="Overdue"
+                value={board.health.overdue}
+                icon={<XCircle className="w-3 h-3" />}
+                variant={board.health.overdue === 0 ? 'success' : board.health.overdue <= 2 ? 'warning' : 'error'}
+              />
+              
+              <HealthTile
+                label="E/S Rate"
+                value={`${board.health.estimationAccuracy}%`}
+                icon={<Target className="w-3 h-3" />}
+                variant={board.health.estimationAccuracy >= 85 ? 'success' : board.health.estimationAccuracy >= 70 ? 'warning' : 'error'}
+              />
+              
+              <HealthTile
+                label="Docs"
+                value={board.health.documentation}
+                icon={<FileText className="w-3 h-3" />}
+                variant="info"
+              />
+              
+              <HealthTile
+                label="Defects"
+                value={board.health.defectRemovalRate}
+                icon={<Bug className="w-3 h-3" />}
+                variant={board.health.defectRemovalRate <= 2 ? 'success' : board.health.defectRemovalRate <= 4 ? 'warning' : 'error'}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const BoardHealthTiles: React.FC<{ board: Board }> = ({ board }) => {
-  return (
-    <div className="space-y-3">
-      <div className="mb-4">
-        <h4 className="text-lg font-bold text-slate-900 mb-1">{board.name} Health</h4>
-        <p className="text-sm text-slate-600">Real-time board metrics</p>
-      </div>
-      
-      {/* Performance Metrics */}
-      <div className="grid grid-cols-1 gap-3">
-        <HealthTile
-          label="Velocity"
-          value={`${board.health.velocity}%`}
-          icon={<TrendingUp className="w-4 h-4" />}
-          variant={board.health.velocity >= 80 ? 'success' : board.health.velocity >= 60 ? 'warning' : 'error'}
-        />
-        
-        <HealthTile
-          label="Completed"
-          value={board.health.completed}
-          icon={<CheckCircle className="w-4 h-4" />}
-          variant="success"
-        />
-        
-        <HealthTile
-          label="Blockers"
-          value={board.health.blockers}
-          icon={<AlertTriangle className="w-4 h-4" />}
-          variant={board.health.blockers === 0 ? 'success' : board.health.blockers <= 3 ? 'warning' : 'error'}
-        />
-        
-        <HealthTile
-          label="Overdue"
-          value={board.health.overdue}
-          icon={<XCircle className="w-4 h-4" />}
-          variant={board.health.overdue === 0 ? 'success' : board.health.overdue <= 2 ? 'warning' : 'error'}
-        />
-        
-        <HealthTile
-          label="Documentation"
-          value={board.health.documentation}
-          icon={<FileText className="w-4 h-4" />}
-          variant="info"
-        />
-        
-        <HealthTile
-          label="UML Diagrams"
-          value={board.health.umlDiagrams}
-          icon={<BarChart3 className="w-4 h-4" />}
-          variant="info"
-        />
-        
-        <HealthTile
-          label="Defect Rate"
-          value={board.health.defectRemovalRate}
-          icon={<Bug className="w-4 h-4" />}
-          variant={board.health.defectRemovalRate <= 2 ? 'success' : board.health.defectRemovalRate <= 4 ? 'warning' : 'error'}
-        />
-        
-        <HealthTile
-          label="E/S Accuracy"
-          value={`${board.health.estimationAccuracy}%`}
-          icon={<Target className="w-4 h-4" />}
-          variant={board.health.estimationAccuracy >= 85 ? 'success' : board.health.estimationAccuracy >= 70 ? 'warning' : 'error'}
-        />
       </div>
     </div>
   );
@@ -668,20 +630,11 @@ function App() {
                     <EMCard em={em} />
                   </div>
 
-                  {/* Boards Section - Now Vertical */}
-                  <div className="col-span-12 lg:col-span-6">
+                  {/* Boards Section */}
+                  <div className="col-span-12 lg:col-span-9">
                     <div className="space-y-6">
                       {em.boards.map((board) => (
-                        <BoardCard key={board.id} board={board} />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* Individual Board Health Tiles */}
-                  <div className="col-span-12 lg:col-span-3">
-                    <div className="space-y-8">
-                      {em.boards.map((board) => (
-                        <BoardHealthTiles key={board.id} board={board} />
+                        <BoardRow key={board.id} board={board} />
                       ))}
                     </div>
                   </div>
