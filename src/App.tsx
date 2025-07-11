@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Activity, TrendingUp, AlertTriangle, CheckCircle, XCircle, Search, Calendar, Award, Building2, Clock, Target, BarChart3, GitBranch, FileText, Bug } from 'lucide-react';
+import { Users, Activity, TrendingUp, AlertTriangle, CheckCircle, XCircle, Search, Calendar, Award, Building2, Clock, Target, BarChart3, GitBranch, FileText, Bug, Zap, Shield, Timer, Gauge } from 'lucide-react';
 
 interface BoardHealth {
   velocity: number;
@@ -24,6 +24,11 @@ interface BoardHealth {
   doneGoals: number; // DG
   pendingDeployment: number; // PD
   productionLive: number; // PL
+  // Weekly metrics (W1, W2, W3, W4)
+  w1: number;
+  w2: number;
+  w3: number;
+  w4: number;
 }
 
 interface Board {
@@ -90,7 +95,11 @@ const mockData: EngineeringManager[] = [
           doneRatio: 8,
           doneGoals: 12,
           pendingDeployment: 3,
-          productionLive: 9
+          productionLive: 9,
+          w1: 12,
+          w2: 18,
+          w3: 15,
+          w4: 22
         }
       },
       {
@@ -121,7 +130,11 @@ const mockData: EngineeringManager[] = [
           doneRatio: 6,
           doneGoals: 8,
           pendingDeployment: 2,
-          productionLive: 6
+          productionLive: 6,
+          w1: 8,
+          w2: 14,
+          w3: 11,
+          w4: 16
         }
       }
     ]
@@ -165,7 +178,11 @@ const mockData: EngineeringManager[] = [
           doneRatio: 15,
           doneGoals: 18,
           pendingDeployment: 2,
-          productionLive: 16
+          productionLive: 16,
+          w1: 20,
+          w2: 25,
+          w3: 28,
+          w4: 32
         }
       },
       {
@@ -196,7 +213,11 @@ const mockData: EngineeringManager[] = [
           doneRatio: 3,
           doneGoals: 5,
           pendingDeployment: 7,
-          productionLive: 3
+          productionLive: 3,
+          w1: 5,
+          w2: 8,
+          w3: 6,
+          w4: 9
         }
       }
     ]
@@ -240,7 +261,11 @@ const mockData: EngineeringManager[] = [
           doneRatio: 12,
           doneGoals: 15,
           pendingDeployment: 3,
-          productionLive: 12
+          productionLive: 12,
+          w1: 15,
+          w2: 19,
+          w3: 17,
+          w4: 24
         }
       }
     ]
@@ -254,21 +279,21 @@ const HealthTile: React.FC<{ label: string; value: number | string; icon: React.
   variant
 }) => {
   const variantStyles = {
-    success: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    warning: 'bg-amber-50 border-amber-200 text-amber-700',
-    error: 'bg-red-50 border-red-200 text-red-700',
-    info: 'bg-blue-50 border-blue-200 text-blue-700'
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100',
+    warning: 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100',
+    error: 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100',
+    info: 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
   };
 
   return (
-    <div className={`p-2 rounded-lg border ${variantStyles[variant]} transition-all duration-200 hover:shadow-md hover:scale-105 min-w-0`}>
-      <div className="flex items-center space-x-1">
-        <div className="p-1 rounded bg-white/60 flex-shrink-0">
+    <div className={`p-3 rounded-lg border ${variantStyles[variant]} transition-all duration-200 hover:shadow-md hover:scale-105`}>
+      <div className="flex items-center space-x-2">
+        <div className="p-1.5 rounded-md bg-white/70 flex-shrink-0">
           {icon}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-medium uppercase tracking-wide opacity-75 truncate">{label}</div>
-          <div className="text-sm font-bold truncate">{value}</div>
+        <div className="flex-1">
+          <div className="text-xs font-medium uppercase tracking-wide opacity-75">{label}</div>
+          <div className="text-lg font-bold">{value}</div>
         </div>
       </div>
     </div>
@@ -287,10 +312,10 @@ const BoardCard: React.FC<{ board: Board }> = ({ board }) => {
 
   const getStatusBorder = (status: string) => {
     switch (status) {
-      case 'healthy': return 'border-emerald-200 hover:border-emerald-300';
-      case 'warning': return 'border-amber-200 hover:border-amber-300';
-      case 'critical': return 'border-red-200 hover:border-red-300';
-      default: return 'border-slate-200 hover:border-slate-300';
+      case 'healthy': return 'border-emerald-200 hover:border-emerald-300 shadow-emerald-100';
+      case 'warning': return 'border-amber-200 hover:border-amber-300 shadow-amber-100';
+      case 'critical': return 'border-red-200 hover:border-red-300 shadow-red-100';
+      default: return 'border-slate-200 hover:border-slate-300 shadow-slate-100';
     }
   };
 
@@ -304,193 +329,195 @@ const BoardCard: React.FC<{ board: Board }> = ({ board }) => {
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border-2 ${getStatusBorder(board.health.status)} p-4 hover:shadow-lg transition-all duration-300 group`}>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">{board.name}</h3>
-          <div className="flex items-center space-x-1 mt-1">
-            <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{board.project}</span>
-            <span className="text-xs text-slate-500">•</span>
-            <span className="text-xs text-slate-500">{board.projectManager}</span>
+    <div className="bg-white rounded-2xl shadow-lg border-2 border-slate-100 hover:shadow-xl transition-all duration-300 overflow-hidden group">
+      {/* Header Section */}
+      <div className={`p-6 border-b border-slate-100 ${getStatusBorder(board.health.status)}`}>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center space-x-3 mb-2">
+              <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{board.name}</h3>
+              <div className={`w-4 h-4 rounded-full ${getStatusColor(board.health.status)} shadow-sm`}></div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">{board.project}</span>
+              <span className="text-sm text-slate-500">•</span>
+              <span className="text-sm text-slate-600">{board.projectManager}</span>
+            </div>
           </div>
         </div>
-        <div className={`w-3 h-3 rounded-full ${getStatusColor(board.health.status)} shadow-sm`}></div>
-      </div>
 
-      {/* Sprint Information */}
-      <div className="mb-3 p-2 bg-slate-50 rounded-lg">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs font-medium text-slate-600">{board.sprint}</span>
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getUnderstandingColor(board.health.sprintUnderstanding)}`}>
-            {board.health.sprintUnderstanding} Level
-          </span>
-        </div>
-        <div className="text-xs text-slate-700 mb-1">{board.health.sprintGoal}</div>
-        <div className="text-xs text-slate-500 flex items-center">
-          <Calendar className="w-3 h-3 mr-1" />
-          {board.health.sprintDates}
-        </div>
-      </div>
-      
-      {/* Sprint Metrics Grid */}
-      <div className="grid grid-cols-5 gap-1 mb-3 text-center">
-        <div className="p-1 bg-blue-50 rounded">
-          <div className="text-xs font-bold text-blue-600">{board.health.backlogItems}</div>
-          <div className="text-xs text-blue-700">BL</div>
-        </div>
-        <div className="p-1 bg-green-50 rounded">
-          <div className="text-xs font-bold text-green-600">{board.health.doneRatio}</div>
-          <div className="text-xs text-green-700">DR</div>
-        </div>
-        <div className="p-1 bg-purple-50 rounded">
-          <div className="text-xs font-bold text-purple-600">{board.health.doneGoals}</div>
-          <div className="text-xs text-purple-700">DG</div>
-        </div>
-        <div className="p-1 bg-orange-50 rounded">
-          <div className="text-xs font-bold text-orange-600">{board.health.pendingDeployment}</div>
-          <div className="text-xs text-orange-700">PD</div>
-        </div>
-        <div className="p-1 bg-emerald-50 rounded">
-          <div className="text-xs font-bold text-emerald-600">{board.health.productionLive}</div>
-          <div className="text-xs text-emerald-700">PL</div>
+        {/* Sprint Information */}
+        <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-slate-700">{board.sprint}</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getUnderstandingColor(board.health.sprintUnderstanding)}`}>
+              Level {board.health.sprintUnderstanding}
+            </span>
+          </div>
+          <div className="text-sm text-slate-800 font-medium mb-2">{board.health.sprintGoal}</div>
+          <div className="text-sm text-slate-600 flex items-center">
+            <Calendar className="w-4 h-4 mr-2" />
+            {board.health.sprintDates}
+          </div>
         </div>
       </div>
 
-      {/* Quality Metrics */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="p-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
-          <div className="text-sm font-bold text-emerald-600">{board.health.estimationAccuracy}%</div>
-          <div className="text-xs font-medium text-emerald-700">E/S Accuracy</div>
-        </div>
-        <div className="p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
-          <div className="text-sm font-bold text-indigo-600">{board.health.devCount}</div>
-          <div className="text-xs font-medium text-indigo-700">Dev Count</div>
-        </div>
-      </div>
+      {/* Main Content Area */}
+      <div className="p-6">
+        <div className="grid grid-cols-2 gap-6">
+          {/* Left Side - Sprint Metrics */}
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">Sprint Metrics</h4>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-blue-700">{board.health.backlogItems}</div>
+                  <div className="text-xs font-semibold text-blue-600 uppercase tracking-wide">BL</div>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-green-700">{board.health.doneRatio}</div>
+                  <div className="text-xs font-semibold text-green-600 uppercase tracking-wide">DR</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-purple-700">{board.health.doneGoals}</div>
+                  <div className="text-xs font-semibold text-purple-600 uppercase tracking-wide">DG</div>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-orange-700">{board.health.pendingDeployment}</div>
+                  <div className="text-xs font-semibold text-orange-600 uppercase tracking-wide">PD</div>
+                </div>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-center">
+                <div className="text-lg font-bold text-emerald-700">{board.health.productionLive}</div>
+                <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">PL</div>
+              </div>
+            </div>
+          </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <div className="flex items-center space-x-1">
-          <TrendingUp className="w-3 h-3 text-slate-500" />
-          <span className="text-xs font-medium text-slate-600">Velocity: {board.health.velocity}%</span>
+          {/* Right Side - Weekly Metrics */}
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide">Weekly Progress</h4>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-indigo-700">{board.health.w1}</div>
+                  <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">W1</div>
+                </div>
+                <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-cyan-700">{board.health.w2}</div>
+                  <div className="text-xs font-semibold text-cyan-600 uppercase tracking-wide">W2</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-teal-700">{board.health.w3}</div>
+                  <div className="text-xs font-semibold text-teal-600 uppercase tracking-wide">W3</div>
+                </div>
+                <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-rose-700">{board.health.w4}</div>
+                  <div className="text-xs font-semibold text-rose-600 uppercase tracking-wide">W4</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center space-x-1">
-          <Activity className="w-3 h-3 text-emerald-500" />
-          <span className="text-xs font-medium text-emerald-600">Active</span>
+
+        {/* Quality Metrics */}
+        <div className="mt-6 pt-6 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-emerald-200">
+              <div className="text-2xl font-bold text-emerald-700">{board.health.estimationAccuracy}%</div>
+              <div className="text-sm font-semibold text-emerald-600">E/S Accuracy</div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-indigo-200">
+              <div className="text-2xl font-bold text-indigo-700">{board.health.devCount}</div>
+              <div className="text-sm font-semibold text-indigo-600">Dev Count</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
+          <div className="flex items-center space-x-2">
+            <Gauge className="w-4 h-4 text-slate-500" />
+            <span className="text-sm font-semibold text-slate-700">Velocity: {board.health.velocity}%</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Activity className="w-4 h-4 text-emerald-500" />
+            <span className="text-sm font-semibold text-emerald-600">Active Sprint</span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const HorizontalHealthTiles: React.FC<{ boards: Board[] }> = ({ boards }) => {
-  const aggregatedHealth = boards.reduce((acc, board) => ({
-    velocity: Math.round((acc.velocity + board.health.velocity) / 2),
-    blockers: acc.blockers + board.health.blockers,
-    overdue: acc.overdue + board.health.overdue,
-    completed: acc.completed + board.health.completed,
-    documentation: acc.documentation + board.health.documentation,
-    umlDiagrams: acc.umlDiagrams + board.health.umlDiagrams,
-    defectRemovalRate: acc.defectRemovalRate + board.health.defectRemovalRate,
-    estimationAccuracy: Math.round((acc.estimationAccuracy + board.health.estimationAccuracy) / 2),
-    devCount: acc.devCount + board.health.devCount,
-    totalSprints: acc.totalSprints + 1
-  }), { 
-    velocity: 0, 
-    blockers: 0, 
-    overdue: 0, 
-    completed: 0, 
-    documentation: 0, 
-    umlDiagrams: 0, 
-    defectRemovalRate: 0, 
-    estimationAccuracy: 0, 
-    devCount: 0, 
-    totalSprints: 0 
-  });
-
+const BoardHealthTiles: React.FC<{ board: Board }> = ({ board }) => {
   return (
-    <div className="space-y-2">
-      <div className="mb-2">
-        <h4 className="text-sm font-semibold text-slate-900 mb-1">Team Health Overview</h4>
-        <p className="text-xs text-slate-500">Aggregated metrics across all boards</p>
+    <div className="space-y-3">
+      <div className="mb-4">
+        <h4 className="text-lg font-bold text-slate-900 mb-1">{board.name} Health</h4>
+        <p className="text-sm text-slate-600">Real-time board metrics</p>
       </div>
       
-      {/* First Row */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Performance Metrics */}
+      <div className="grid grid-cols-1 gap-3">
         <HealthTile
-          label="Avg Velocity"
-          value={`${aggregatedHealth.velocity}%`}
-          icon={<TrendingUp className="w-3 h-3" />}
-          variant={aggregatedHealth.velocity >= 80 ? 'success' : aggregatedHealth.velocity >= 60 ? 'warning' : 'error'}
+          label="Velocity"
+          value={`${board.health.velocity}%`}
+          icon={<TrendingUp className="w-4 h-4" />}
+          variant={board.health.velocity >= 80 ? 'success' : board.health.velocity >= 60 ? 'warning' : 'error'}
         />
+        
         <HealthTile
           label="Completed"
-          value={aggregatedHealth.completed}
-          icon={<CheckCircle className="w-3 h-3" />}
+          value={board.health.completed}
+          icon={<CheckCircle className="w-4 h-4" />}
           variant="success"
         />
-      </div>
-
-      {/* Second Row */}
-      <div className="grid grid-cols-2 gap-2">
+        
         <HealthTile
           label="Blockers"
-          value={aggregatedHealth.blockers}
-          icon={<AlertTriangle className="w-3 h-3" />}
-          variant={aggregatedHealth.blockers === 0 ? 'success' : aggregatedHealth.blockers <= 5 ? 'warning' : 'error'}
+          value={board.health.blockers}
+          icon={<AlertTriangle className="w-4 h-4" />}
+          variant={board.health.blockers === 0 ? 'success' : board.health.blockers <= 3 ? 'warning' : 'error'}
         />
+        
         <HealthTile
           label="Overdue"
-          value={aggregatedHealth.overdue}
-          icon={<XCircle className="w-3 h-3" />}
-          variant={aggregatedHealth.overdue === 0 ? 'success' : aggregatedHealth.overdue <= 3 ? 'warning' : 'error'}
+          value={board.health.overdue}
+          icon={<XCircle className="w-4 h-4" />}
+          variant={board.health.overdue === 0 ? 'success' : board.health.overdue <= 2 ? 'warning' : 'error'}
         />
-      </div>
-
-      {/* Third Row */}
-      <div className="grid grid-cols-2 gap-2">
+        
         <HealthTile
           label="Documentation"
-          value={aggregatedHealth.documentation}
-          icon={<FileText className="w-3 h-3" />}
+          value={board.health.documentation}
+          icon={<FileText className="w-4 h-4" />}
           variant="info"
         />
+        
         <HealthTile
           label="UML Diagrams"
-          value={aggregatedHealth.umlDiagrams}
-          icon={<BarChart3 className="w-3 h-3" />}
+          value={board.health.umlDiagrams}
+          icon={<BarChart3 className="w-4 h-4" />}
           variant="info"
         />
-      </div>
-
-      {/* Fourth Row */}
-      <div className="grid grid-cols-2 gap-2">
+        
         <HealthTile
           label="Defect Rate"
-          value={aggregatedHealth.defectRemovalRate}
-          icon={<Bug className="w-3 h-3" />}
-          variant={aggregatedHealth.defectRemovalRate <= 2 ? 'success' : aggregatedHealth.defectRemovalRate <= 5 ? 'warning' : 'error'}
+          value={board.health.defectRemovalRate}
+          icon={<Bug className="w-4 h-4" />}
+          variant={board.health.defectRemovalRate <= 2 ? 'success' : board.health.defectRemovalRate <= 4 ? 'warning' : 'error'}
         />
+        
         <HealthTile
           label="E/S Accuracy"
-          value={`${aggregatedHealth.estimationAccuracy}%`}
-          icon={<Target className="w-3 h-3" />}
-          variant={aggregatedHealth.estimationAccuracy >= 85 ? 'success' : aggregatedHealth.estimationAccuracy >= 70 ? 'warning' : 'error'}
-        />
-      </div>
-
-      {/* Fifth Row */}
-      <div className="grid grid-cols-2 gap-2">
-        <HealthTile
-          label="Total Devs"
-          value={aggregatedHealth.devCount}
-          icon={<Users className="w-3 h-3" />}
-          variant="info"
-        />
-        <HealthTile
-          label="Active Sprints"
-          value={aggregatedHealth.totalSprints}
-          icon={<GitBranch className="w-3 h-3" />}
-          variant="info"
+          value={`${board.health.estimationAccuracy}%`}
+          icon={<Target className="w-4 h-4" />}
+          variant={board.health.estimationAccuracy >= 85 ? 'success' : board.health.estimationAccuracy >= 70 ? 'warning' : 'error'}
         />
       </div>
     </div>
@@ -516,61 +543,61 @@ const EMCard: React.FC<{ em: EngineeringManager }> = ({ em }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-blue-300 group">
-      <div className="flex items-start space-x-3 mb-4">
+    <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-300 group">
+      <div className="flex items-start space-x-4 mb-6">
         <div className="relative">
           <img 
             src={em.avatar} 
             alt={em.name}
-            className="w-12 h-12 rounded-xl object-cover border-2 border-blue-100 group-hover:border-blue-200 transition-colors"
+            className="w-16 h-16 rounded-2xl object-cover border-2 border-blue-100 group-hover:border-blue-200 transition-colors shadow-md"
           />
-          <div className={`absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold ${getRatingColor(em.understandingLevel)}`}>
+          <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-sm font-bold ${getRatingColor(em.understandingLevel)} shadow-lg`}>
             {em.understandingLevel}
           </div>
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">{em.name}</h3>
-          <p className="text-xs font-medium text-slate-600">{em.title}</p>
-          <div className="flex items-center space-x-1 mt-1">
-            <Building2 className="w-3 h-3 text-slate-400" />
-            <span className="text-xs text-slate-500">{em.department}</span>
+          <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{em.name}</h3>
+          <p className="text-sm font-semibold text-slate-600 mb-2">{em.title}</p>
+          <div className="flex items-center space-x-2">
+            <Building2 className="w-4 h-4 text-slate-400" />
+            <span className="text-sm text-slate-600">{em.department}</span>
           </div>
         </div>
       </div>
       
-      <div className="space-y-3">
-        <div className="grid grid-cols-1 gap-2">
-          <div className="bg-slate-50 rounded-lg p-2">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-3 h-3 text-slate-500" />
-              <span className="text-xs font-medium text-slate-600 uppercase tracking-wide">Experience</span>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-3">
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Calendar className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Experience</span>
             </div>
-            <div className="text-sm font-semibold text-slate-900">{em.experience}</div>
+            <div className="text-lg font-bold text-slate-900">{em.experience}</div>
           </div>
           
-          <div className="bg-slate-50 rounded-lg p-2">
-            <div className="flex items-center space-x-1">
-              <Award className="w-3 h-3 text-slate-500" />
-              <span className="text-xs font-medium text-slate-600 uppercase tracking-wide">Understanding Level</span>
+          <div className="bg-gradient-to-r from-slate-50 to-purple-50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Award className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Understanding Level</span>
             </div>
-            <div className="text-sm font-semibold text-slate-900">Level {em.understandingLevel}</div>
+            <div className="text-lg font-bold text-slate-900">Level {em.understandingLevel}</div>
           </div>
           
-          <div className="bg-slate-50 rounded-lg p-2">
-            <div className="flex items-center space-x-1">
-              <Clock className="w-3 h-3 text-slate-500" />
-              <span className="text-xs font-medium text-slate-600 uppercase tracking-wide">Target Date to A</span>
+          <div className="bg-gradient-to-r from-slate-50 to-amber-50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center space-x-2 mb-2">
+              <Clock className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Target Date to A</span>
             </div>
-            <div className="text-xs font-semibold text-slate-900">{formatDate(em.understandingTargetDate)}</div>
+            <div className="text-sm font-bold text-slate-900">{formatDate(em.understandingTargetDate)}</div>
           </div>
         </div>
         
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-          <div className="flex items-center space-x-1">
-            <Users className="w-3 h-3 text-slate-500" />
-            <span className="text-xs font-medium text-slate-600">{em.teamsCount} Teams</span>
+        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+          <div className="flex items-center space-x-2">
+            <Users className="w-4 h-4 text-slate-500" />
+            <span className="text-sm font-semibold text-slate-700">{em.teamsCount} Teams</span>
           </div>
-          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold border border-blue-200">
+          <span className="bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-sm font-bold border border-blue-200">
             {em.boards.length} Boards
           </span>
         </div>
@@ -597,19 +624,19 @@ function App() {
   }, [searchTerm]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="bg-white shadow-lg border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Engineering Dashboard</h1>
-              <p className="text-slate-600 mt-2">Board of Boards Overview • Real-time Engineering Metrics</p>
+              <h1 className="text-4xl font-bold text-slate-900 mb-2">Engineering Dashboard</h1>
+              <p className="text-slate-600 text-lg">Board of Boards Overview • Real-time Engineering Metrics</p>
             </div>
             
             {/* Search Box */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400" />
               </div>
               <input
@@ -617,7 +644,7 @@ function App() {
                 placeholder="Search engineering managers, teams, or boards..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-80 pl-10 pr-3 py-3 border border-slate-300 rounded-xl leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="block w-96 pl-12 pr-4 py-4 border border-slate-300 rounded-2xl leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm"
               />
             </div>
           </div>
@@ -627,32 +654,36 @@ function App() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {filteredData.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-slate-400 text-lg">No results found for "{searchTerm}"</div>
+          <div className="text-center py-16">
+            <div className="text-slate-400 text-xl">No results found for "{searchTerm}"</div>
             <p className="text-slate-500 mt-2">Try adjusting your search terms</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-12">
             {filteredData.map((em) => (
-              <div key={em.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-all duration-300">
-                <div className="grid grid-cols-12 gap-4">
+              <div key={em.id} className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8 hover:shadow-2xl transition-all duration-300">
+                <div className="grid grid-cols-12 gap-8">
                   {/* Engineering Manager Card */}
-                  <div className="col-span-12 lg:col-span-2">
+                  <div className="col-span-12 lg:col-span-3">
                     <EMCard em={em} />
                   </div>
 
-                  {/* Boards Section */}
-                  <div className="col-span-12 lg:col-span-7">
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {/* Boards Section - Now Vertical */}
+                  <div className="col-span-12 lg:col-span-6">
+                    <div className="space-y-6">
                       {em.boards.map((board) => (
                         <BoardCard key={board.id} board={board} />
                       ))}
                     </div>
                   </div>
                   
-                  {/* Health Overview - Horizontal tiles on the right */}
+                  {/* Individual Board Health Tiles */}
                   <div className="col-span-12 lg:col-span-3">
-                    <HorizontalHealthTiles boards={em.boards} />
+                    <div className="space-y-8">
+                      {em.boards.map((board) => (
+                        <BoardHealthTiles key={board.id} board={board} />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
